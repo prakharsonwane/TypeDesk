@@ -1,6 +1,6 @@
 <!DOCTYPE html><html>
 <head>
-  <title>Type Desk</title>  <style>
+  <title>Type Desk Pro</title>  <style>
     body {
       margin: 0;
       font-family: Arial;
@@ -9,10 +9,8 @@
       text-align: center;
     }
 
-    /* LIGHT BLUE LOGIN */
     #loginPage {
       background: #e0f2fe;
-      width: 100%;
       height: 100vh;
     }
 
@@ -27,14 +25,28 @@
       background: white;
       color: black;
       padding: 30px;
-      border-radius: 10px;
+      border-radius: 12px;
       width: 300px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
 
     input, button {
       padding: 10px;
       margin: 10px;
-      width: 80%;
+      width: 85%;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      background: #0ea5e9;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0284c7;
     }
 
     .hidden { display: none; }
@@ -50,187 +62,228 @@
       height: 120px;
       margin-top: 20px;
       font-size: 18px;
+      border-radius: 8px;
     }
 
     .correct { color: #22c55e; }
     .wrong { color: #ef4444; }
+
+    .stats {
+      margin-top: 10px;
+    }
   </style></head><body><!-- LOGIN --><div id="loginPage" class="center">
   <div class="card">
-    <h2>Type Desk</h2><input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<input id="color" placeholder="Favourite Color">
-
-<button onclick="login()">Login / Register</button>
-<button onclick="forgotPassword()">Forgot Password?</button>
-
+    <h2>Type Desk Pro</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <input id="color" placeholder="Favourite Color">
+    <button onclick="login()">Login / Register</button>
+    <button onclick="forgotPassword()">Forgot Password?</button>
   </div>
 </div><!-- MODE --><div id="modePage" class="hidden center">
   <div class="card" style="background:#1e293b;color:white;">
-    <h2>Select Mode</h2>
+    <h2 id="welcome"></h2>
     <button onclick="startGame('easy')">Easy</button>
     <button onclick="startGame('medium')">Medium</button>
     <button onclick="startGame('hard')">Hard</button>
     <button onclick="startGame('extreme')">Extreme</button>
+    <button onclick="showLeaderboard()">🏆 Leaderboard</button>
   </div>
 </div><!-- GAME --><div id="gamePage" class="hidden">
   <div class="game-box">
     <h2 id="modeTitle"></h2>
-    <h3>Level: <span id="level">1</span></h3><p id="text"></p>
-
-<textarea id="input" placeholder="Start typing..."></textarea>
-
-<p>⏱ Time: <span id="time">30</span>s</p>
+    <h3>Level: <span id="level">1</span></h3>
+    <p id="text"></p>
+    <textarea id="input"></textarea><div class="stats">
+  ⏱ Time: <span id="time">30</span>s |
+  🎯 Accuracy: <span id="accuracy">0</span>% |
+  🏆 Score: <span id="score">0</span>
+</div>
 
 <button onclick="nextLevel()">Next Level</button>
 <button onclick="restart()">Restart</button>
-<br><br>
 <button onclick="goBack()">⬅ Back</button>
 
   </div>
+</div><!-- LEADERBOARD --><div id="leaderPage" class="hidden center">
+  <div class="card">
+    <h2>Leaderboard</h2>
+    <ul id="leaderList"></ul>
+    <button onclick="backToMenu()">Back</button>
+  </div>
 </div><script>
 
+let currentUser="";
+let score=0;
+let correctChars=0;
+let totalChars=0;
+
 // LOGIN
-function login() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  const color = document.getElementById("color").value;
+function login(){
+  const user=username.value;
+  const pass=password.value;
+  const color=colorInput=color.value;
 
-  if (!user || !pass || !color) {
-    alert("Fill all fields (including favourite color)");
-    return;
+  if(!user||!pass||!color){alert("Fill all");return;}
+
+  const stored=localStorage.getItem(user);
+
+  if(!stored){
+    localStorage.setItem(user,JSON.stringify({password:pass,color:color}));
+  }else{
+    const data=JSON.parse(stored);
+    if(data.password!==pass){
+      alert("Wrong password! Use forgot password");
+      return;
+    }
   }
 
-  const data = { password: pass, color: color };
-  localStorage.setItem(user, JSON.stringify(data));
+  currentUser=user;
+  welcome.innerText="Welcome, "+user+" 👋";
 
-  document.getElementById("loginPage").classList.add("hidden");
-  document.getElementById("modePage").classList.remove("hidden");
+  loginPage.classList.add("hidden");
+  modePage.classList.remove("hidden");
 }
 
-// FORGOT PASSWORD
-function forgotPassword() {
-  const user = prompt("Enter username:");
-  if (!user) return;
+// FORGOT
+function forgotPassword(){
+  const user=prompt("Enter username:");
+  const stored=localStorage.getItem(user);
+  if(!stored)return alert("User not found");
 
-  const stored = localStorage.getItem(user);
-  if (!stored) {
-    alert("User not found!");
-    return;
-  }
+  const col=prompt("Enter favourite color:");
+  const data=JSON.parse(stored);
 
-  const color = prompt("Enter favourite color:");
-  if (!color) {
-    alert("Please enter favourite color!");
-    return;
-  }
-
-  const data = JSON.parse(stored);
-
-  if (data.color === color) {
-    alert("Your password is: " + data.password);
-  } else {
-    alert("Wrong favourite color!");
+  if(data.color===col){
+    alert("Password: "+data.password);
+  }else{
+    alert("Wrong color");
   }
 }
 
-// DATA (same as before)
-const dataSet = {
-  easy: ["Cat runs.","Sun is bright.","Dog plays outside.","Sky is blue. Birds fly.","Water is clear. Fire is hot.","Trees are green. Milk is white.","Fish swim fast. Air is fresh.","Practice typing daily.","Typing is fun.","Small steps lead to success."],
-  medium: ["Typing improves speed and accuracy.","Practice daily typing.","Focus on each word carefully.","Consistency is key.","Errors should be reduced.","Typing helps communication.","Work smart and practice.","Accuracy matters.","Stay calm and focused.","Typing is essential."],
-  hard: ["Typing requires focus, patience, and regular practice.","Improving typing speed takes time and effort.","Accuracy should not be ignored, because mistakes reduce speed.","Challenging paragraphs improve concentration.","Typing tests enhance speed and focus.","Complex sentences, with punctuation, improve skills.","Stay focused and avoid distractions.","Hard typing tests demand control.","Maintain rhythm and accuracy.","Practice regularly to master typing."],
-  extreme: ["Advanced typing requires skills: speed, accuracy, and endurance; without these, progress slows.","Long paragraphs test ability.","Consistency is important; without focus improvement is difficult.","Typing under pressure builds control.","Extreme tests push limits: speed must increase.","Maintaining accuracy is challenging; practice helps.","Complex structures, including commas and colons, improve precision.","\"Practice daily,\" experts say.","Typing requires coordination between mind and hands.","Final challenge: test your speed and patience."]
+// DATA (short for space)
+const dataSet={
+easy:["Cat runs.","Sun is bright.","Dog plays.","Sky blue.","Water clear.","Trees green.","Fish swim.","Practice daily.","Typing fun.","Stay consistent."],
+medium:["Typing improves speed.","Practice daily typing.","Focus on words.","Consistency is key.","Reduce errors.","Typing helps.","Work smart.","Accuracy matters.","Stay calm.","Typing essential."],
+hard:["Typing requires focus, patience, and practice.","Improving typing speed takes effort.","Accuracy should not be ignored.","Challenging paragraphs improve concentration.","Typing tests enhance speed and focus.","Complex sentences improve skills.","Stay focused and avoid distractions.","Hard tests demand control.","Maintain rhythm and accuracy.","Practice regularly."],
+extreme:["Advanced typing requires skills: speed, accuracy, and endurance; without these, progress slows.","Long paragraphs test ability.","Consistency is important; without focus improvement is difficult.","Typing under pressure builds control.","Extreme tests push limits.","Maintaining accuracy is challenging; practice helps.","Complex structures improve precision.","\"Practice daily,\" experts say.","Typing requires coordination.","Final challenge: test your speed."]
 };
 
-let mode="", level=1, timer, timeLeft;
+let mode="",level=1,timer,timeLeft;
 
 // START
-function startGame(m) {
-  mode = m;
-  level = 1;
+function startGame(m){
+mode=m;level=1;
+score=0;correctChars=0;totalChars=0;
 
-  document.getElementById("modePage").classList.add("hidden");
-  document.getElementById("gamePage").classList.remove("hidden");
+modePage.classList.add("hidden");
+gamePage.classList.remove("hidden");
 
-  document.getElementById("modeTitle").innerText = mode.toUpperCase();
-  loadLevel();
+modeTitle.innerText=mode.toUpperCase();
+loadLevel();
 }
 
 // LOAD
-function loadLevel() {
-  document.getElementById("text").innerText = dataSet[mode][level-1];
-  document.getElementById("level").innerText = level;
+function loadLevel(){
+text.innerText=dataSet[mode][level-1];
+levelSpan=level;
 
-  timeLeft = mode==="easy"?30:mode==="medium"?45:60;
-  document.getElementById("time").innerText = timeLeft;
+timeLeft=mode==="easy"?30:mode==="medium"?45:60;
+time.innerText=timeLeft;
+input.value="";
 
-  document.getElementById("input").value = "";
-
-  clearInterval(timer);
-  timer = setInterval(()=>{
-    timeLeft--;
-    document.getElementById("time").innerText = timeLeft;
-
-    if(timeLeft<=5 && timeLeft>0) beep();
-
-    if(timeLeft===0){
-      clearInterval(timer);
-      alert("Time up!");
-    }
-  },1000);
+clearInterval(timer);
+timer=setInterval(()=>{
+timeLeft--;
+time.innerText=timeLeft;
+if(timeLeft<=5&&timeLeft>0)beep();
+if(timeLeft===0){clearInterval(timer);alert("Time up");}
+},1000);
 }
 
-// TYPING
-document.getElementById("input").addEventListener("input", function(){
-  const text = dataSet[mode][level-1];
-  const typed = this.value;
+// INPUT
+input.addEventListener("input",function(){
+const t=dataSet[mode][level-1];
+const typed=this.value;
 
-  let result="";
-  for(let i=0;i<text.length;i++){
-    if(typed[i]==null) result+=text[i];
-    else if(typed[i]===text[i]) result+=`<span class="correct">${text[i]}</span>`;
-    else result+=`<span class="wrong">${text[i]}</span>`;
-  }
+let res="";correctChars=0;
 
-  document.getElementById("text").innerHTML=result;
+for(let i=0;i<t.length;i++){
+if(typed[i]==null)res+=t[i];
+else if(typed[i]===t[i]){
+res+=`<span class="correct">${t[i]}</span>`;
+correctChars++;
+}else{
+res+=`<span class="wrong">${t[i]}</span>`;
+}
+}
+totalChars=t.length;
+text.innerHTML=res;
+
+accuracy.innerText=Math.floor((correctChars/totalChars)*100);
 });
 
 // NEXT
 function nextLevel(){
-  const input=document.getElementById("input").value;
-  const correct=dataSet[mode][level-1];
+const correct=dataSet[mode][level-1];
+if(input.value!==correct){alert("Complete correctly");return;}
 
-  if(input!==correct){
-    alert("Complete correctly first!");
-    return;
-  }
+score+=mode==="easy"?10:mode==="medium"?20:mode==="hard"?30:50;
+document.getElementById("score").innerText=score;
 
-  if(level<10){
-    level++;
-    loadLevel();
-  } else {
-    alert("🎉 Mode Completed!");
-  }
+if(level<10){level++;loadLevel();}
+else{
+saveScore();
+alert("Mode Completed!");
+goBack();
+}
+}
+
+// SAVE SCORE
+function saveScore(){
+let board=JSON.parse(localStorage.getItem("leaderboard")||"[]");
+board.push({user:currentUser,score:score});
+board.sort((a,b)=>b.score-a.score);
+board=board.slice(0,5);
+localStorage.setItem("leaderboard",JSON.stringify(board));
+}
+
+// SHOW LEADERBOARD
+function showLeaderboard(){
+modePage.classList.add("hidden");
+leaderPage.classList.remove("hidden");
+
+const list=document.getElementById("leaderList");
+list.innerHTML="";
+const board=JSON.parse(localStorage.getItem("leaderboard")||"[]");
+
+board.forEach(p=>{
+list.innerHTML+=`<li>${p.user} - ${p.score}</li>`;
+});
+}
+
+function backToMenu(){
+leaderPage.classList.add("hidden");
+modePage.classList.remove("hidden");
+}
+
+// BACK
+function goBack(){
+clearInterval(timer);
+gamePage.classList.add("hidden");
+modePage.classList.remove("hidden");
 }
 
 // RESTART
-function restart(){
-  loadLevel();
-}
-
-// BACK TO MODE SELECT
-function goBack(){
-  clearInterval(timer);
-  document.getElementById("gamePage").classList.add("hidden");
-  document.getElementById("modePage").classList.remove("hidden");
-}
+function restart(){loadLevel();}
 
 // SOUND
 function beep(){
-  const ctx=new (window.AudioContext||window.webkitAudioContext)();
-  const osc=ctx.createOscillator();
-  osc.connect(ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime+0.1);
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+const osc=ctx.createOscillator();
+osc.connect(ctx.destination);
+osc.start();
+osc.stop(ctx.currentTime+0.1);
 }
 
 </script></body>
