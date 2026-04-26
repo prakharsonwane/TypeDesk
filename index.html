@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TypeDesk</title>
+  <style>
+    body { text-align:center; font-family:Arial; }
+    input, textarea { margin:5px; padding:8px; }
+    .hide { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>TypeDesk Login</h2>
+  <input id="luser" placeholder="Username"><br>
+  <input id="lpass" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button><br>
+  <p onclick="show('signup')">Create Account</p>
+  <p onclick="show('forgot')">Forgot Password?</p>
+</div>
+
+<!-- SIGNUP -->
+<div id="signup" class="hide">
+  <h2>Signup</h2>
+  <input id="suser" placeholder="Username"><br>
+  <input id="spass" type="password" placeholder="Password"><br>
+  <input id="color" placeholder="Favourite Colour"><br>
+  <button onclick="signup()">Create</button><br>
+  <p onclick="show('login')">Back</p>
+</div>
+
+<!-- FORGOT -->
+<div id="forgot" class="hide">
+  <h2>Reset Password</h2>
+  <input id="fuser" placeholder="Username"><br>
+  <input id="fcolor" placeholder="Favourite Colour"><br>
+  <input id="newpass" type="password" placeholder="New Password"><br>
+  <button onclick="resetPass()">Reset</button>
+</div>
+
+<!-- TYPING -->
+<div id="typing" class="hide">
+  <h2>Typing Test</h2>
+  <p id="text">The quick brown fox jumps over the lazy dog</p>
+  <textarea id="input"></textarea><br>
+  <button onclick="start()">Start</button>
+  <button onclick="result()">Finish</button>
+  <p id="res"></p>
+</div>
+
+<script>
+let startTime;
+
+// Page switch
+function show(page) {
+  document.querySelectorAll("div").forEach(d => d.classList.add("hide"));
+  document.getElementById(page).classList.remove("hide");
+}
+
+// Signup
+function signup() {
+  let user = document.getElementById("suser").value;
+  let pass = document.getElementById("spass").value;
+  let color = document.getElementById("color").value.toLowerCase();
+
+  localStorage.setItem(user, JSON.stringify({ pass, color }));
+  alert("Account created");
+  show('login');
+}
+
+// Login
+function login() {
+  let user = document.getElementById("luser").value;
+  let pass = document.getElementById("lpass").value;
+
+  let data = JSON.parse(localStorage.getItem(user));
+
+  if (data && data.pass === pass) {
+    show('typing');
+  } else {
+    alert("Wrong login");
+  }
+}
+
+// Reset Password
+function resetPass() {
+  let user = document.getElementById("fuser").value;
+  let color = document.getElementById("fcolor").value.toLowerCase();
+  let newPass = document.getElementById("newpass").value;
+
+  let data = JSON.parse(localStorage.getItem(user));
+
+  if (data && data.color === color) {
+    data.pass = newPass;
+    localStorage.setItem(user, JSON.stringify(data));
+    alert("Password reset");
+    show('login');
+  } else {
+    alert("Wrong answer");
+  }
+}
+
+// Typing
+function start() {
+  startTime = new Date().getTime();
+}
+
+function result() {
+  let end = new Date().getTime();
+  let time = (end - startTime) / 1000;
+
+  let text = document.getElementById("text").innerText;
+  let input = document.getElementById("input").value;
+
+  let words = input.trim().split(" ").length;
+  let wpm = Math.round(words / (time / 60));
+
+  let correct = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === input[i]) correct++;
+  }
+
+  let acc = (correct / text.length) * 100;
+
+  document.getElementById("res").innerText =
+    "WPM: " + wpm + " | Accuracy: " + acc.toFixed(2) + "%";
+}
+</script>
+
+</body>
+</html>
