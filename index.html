@@ -1,130 +1,189 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TypeDesk</title>
+  <title>Type Desk</title>
+
   <style>
-    body { text-align:center; font-family:Arial; }
-    input, textarea { margin:5px; padding:8px; }
-    .hide { display:none; }
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* GAME */
+    .game-box {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 10px;
+    }
+
+    .stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <h2>TypeDesk Login</h2>
-  <input id="luser" placeholder="Username"><br>
-  <input id="lpass" type="password" placeholder="Password"><br>
-  <button onclick="login()">Login</button><br>
-  <p onclick="show('signup')">Create Account</p>
-  <p onclick="show('forgot')">Forgot Password?</p>
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="center">
+  <div class="card">
+    <h2>Type Desk</h2>
+    <p>Login / Register</p>
+
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="login()">Enter</button>
+  </div>
 </div>
 
-<!-- SIGNUP -->
-<div id="signup" class="hide">
-  <h2>Signup</h2>
-  <input id="suser" placeholder="Username"><br>
-  <input id="spass" type="password" placeholder="Password"><br>
-  <input id="color" placeholder="Favourite Colour"><br>
-  <button onclick="signup()">Create</button><br>
-  <p onclick="show('login')">Back</p>
-</div>
+<!-- GAME PAGE -->
+<div id="gamePage" class="hidden">
+  <div class="game-box">
+    <h1>Type Desk</h1>
 
-<!-- FORGOT -->
-<div id="forgot" class="hide">
-  <h2>Reset Password</h2>
-  <input id="fuser" placeholder="Username"><br>
-  <input id="fcolor" placeholder="Favourite Colour"><br>
-  <input id="newpass" type="password" placeholder="New Password"><br>
-  <button onclick="resetPass()">Reset</button>
-</div>
+    <h3>Level: <span id="level">1</span></h3>
 
-<!-- TYPING -->
-<div id="typing" class="hide">
-  <h2>Typing Test</h2>
-  <p id="text">The quick brown fox jumps over the lazy dog</p>
-  <textarea id="input"></textarea><br>
-  <button onclick="start()">Start</button>
-  <button onclick="result()">Finish</button>
-  <p id="res"></p>
+    <p id="text"></p>
+
+    <textarea id="input" placeholder="Start typing..."></textarea>
+
+    <div class="stats">
+      ⏱ Time: <span id="time">30</span>s
+    </div>
+
+    <button onclick="restart()">Restart</button>
+  </div>
 </div>
 
 <script>
-let startTime;
+let level = 1;
+let timeLeft = 30;
+let timer;
 
-// Page switch
-function show(page) {
-  document.querySelectorAll("div").forEach(d => d.classList.add("hide"));
-  document.getElementById(page).classList.remove("hide");
-}
+// Levels
+const levels = [
+  "The sun is bright and the sky is blue.",
+  "Typing fast needs practice and focus every day.",
+  "Small steps lead to big success in learning typing.",
 
-// Signup
-function signup() {
-  let user = document.getElementById("suser").value;
-  let pass = document.getElementById("spass").value;
-  let color = document.getElementById("color").value.toLowerCase();
+  "Typing is an essential skill in the modern world. It helps you work faster and communicate efficiently.",
+  "Practice daily with focus and patience. Accuracy is more important than speed in the beginning stages.",
+  "As you improve your typing skills, you will notice better speed and fewer mistakes over time.",
 
-  localStorage.setItem(user, JSON.stringify({ pass, color }));
-  alert("Account created");
-  show('login');
-}
+  "Consistency, discipline, and focus are the keys to mastering typing skills. Complex sentences with punctuation improve your overall ability.",
+  "Advanced typing requires precision and speed. Errors must be minimized while maintaining a steady rhythm throughout the paragraph.",
+  "Typing challenges become more difficult as you progress. Longer texts demand concentration, accuracy, and endurance from the user.",
+  "Congratulations! You are attempting the final level. This paragraph is designed to test your maximum typing speed, accuracy, and patience under pressure."
+];
 
-// Login
+// LOGIN
 function login() {
-  let user = document.getElementById("luser").value;
-  let pass = document.getElementById("lpass").value;
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
 
-  let data = JSON.parse(localStorage.getItem(user));
-
-  if (data && data.pass === pass) {
-    show('typing');
-  } else {
-    alert("Wrong login");
-  }
-}
-
-// Reset Password
-function resetPass() {
-  let user = document.getElementById("fuser").value;
-  let color = document.getElementById("fcolor").value.toLowerCase();
-  let newPass = document.getElementById("newpass").value;
-
-  let data = JSON.parse(localStorage.getItem(user));
-
-  if (data && data.color === color) {
-    data.pass = newPass;
-    localStorage.setItem(user, JSON.stringify(data));
-    alert("Password reset");
-    show('login');
-  } else {
-    alert("Wrong answer");
-  }
-}
-
-// Typing
-function start() {
-  startTime = new Date().getTime();
-}
-
-function result() {
-  let end = new Date().getTime();
-  let time = (end - startTime) / 1000;
-
-  let text = document.getElementById("text").innerText;
-  let input = document.getElementById("input").value;
-
-  let words = input.trim().split(" ").length;
-  let wpm = Math.round(words / (time / 60));
-
-  let correct = 0;
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] === input[i]) correct++;
+  if (!user || !pass) {
+    alert("Fill all fields");
+    return;
   }
 
-  let acc = (correct / text.length) * 100;
+  localStorage.setItem(user, pass);
 
-  document.getElementById("res").innerText =
-    "WPM: " + wpm + " | Accuracy: " + acc.toFixed(2) + "%";
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("gamePage").classList.remove("hidden");
+
+  loadLevel();
+}
+
+// LOAD LEVEL
+function loadLevel() {
+  document.getElementById("level").innerText = level;
+  document.getElementById("text").innerText = levels[level - 1];
+
+  if (level <= 3) timeLeft = 30;
+  else if (level <= 6) timeLeft = 45;
+  else timeLeft = 60;
+
+  document.getElementById("time").innerText = timeLeft;
+
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("time").innerText = timeLeft;
+
+    if (timeLeft === 0) {
+      clearInterval(timer);
+      alert("⏰ Time's up!");
+    }
+  }, 1000);
+}
+
+// TYPING CHECK
+document.getElementById("input").addEventListener("input", function() {
+  const currentText = levels[level - 1];
+
+  if (this.value === currentText) {
+    clearInterval(timer);
+
+    if (level < 10) {
+      level++;
+      alert("Level Up 🚀");
+      this.value = "";
+      loadLevel();
+    } else {
+      alert("🎉 All levels completed!");
+    }
+  }
+});
+
+// RESTART
+function restart() {
+  document.getElementById("input").value = "";
+  loadLevel();
 }
 </script>
 
