@@ -9,6 +9,13 @@
       text-align: center;
     }
 
+    /* LOGIN PAGE BLUE */
+    #loginPage {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      width: 100%;
+      height: 100vh;
+    }
+
     .center {
       display: flex;
       justify-content: center;
@@ -17,7 +24,8 @@
     }
 
     .card {
-      background: #1e293b;
+      background: white;
+      color: black;
       padding: 30px;
       border-radius: 10px;
       width: 300px;
@@ -48,13 +56,16 @@
     .wrong { color: #ef4444; }
   </style></head><body><!-- LOGIN --><div id="loginPage" class="center">
   <div class="card">
-    <h2>Type Desk</h2>
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Enter</button>
+    <h2>Type Desk</h2><input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<input id="color" placeholder="Favourite Color">
+
+<button onclick="login()">Login / Register</button>
+<button onclick="forgotPassword()">Forgot Password?</button>
+
   </div>
 </div><!-- MODE --><div id="modePage" class="hidden center">
-  <div class="card">
+  <div class="card" style="background:#1e293b;color:white;">
     <h2>Select Mode</h2>
     <button onclick="startGame('easy')">Easy</button>
     <button onclick="startGame('medium')">Medium</button>
@@ -76,49 +87,94 @@
   </div>
 </div><script>
 
+// LOGIN
 function login() {
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+  const color = document.getElementById("color").value;
+
+  if (!user || !pass || !color) {
+    alert("Fill all fields");
+    return;
+  }
+
+  const data = { password: pass, color: color };
+  localStorage.setItem(user, JSON.stringify(data));
+
   document.getElementById("loginPage").classList.add("hidden");
   document.getElementById("modePage").classList.remove("hidden");
 }
 
-// DATA
-const data = {
-  easy: ["Cat runs fast.","Sun is bright.","Dog plays outside.","Sky looks blue.","Birds can fly.","Water is clear.","Fire is hot.","Trees are green.","Milk is white.","Fish swim fast."],
+// FORGOT PASSWORD
+function forgotPassword() {
+  const user = prompt("Enter username:");
+  const color = prompt("Enter favourite color:");
+
+  const stored = localStorage.getItem(user);
+  if (!stored) return alert("User not found!");
+
+  const data = JSON.parse(stored);
+
+  if (data.color === color) {
+    alert("Your password is: " + data.password);
+  } else {
+    alert("Wrong colour!");
+  }
+}
+
+// LEVEL DATA
+const dataSet = {
+
+  easy: [
+    "Cat runs.",
+    "Sun is bright.",
+    "Dog plays outside.",
+    "Sky is blue. Birds fly.",
+    "Water is clear. Fire is hot.",
+    "Trees are green. Milk is white.",
+    "Fish swim fast. Air is fresh.",
+    "Practice typing daily. Improve slowly.",
+    "Typing is fun. Keep practicing daily.",
+    "Small steps lead to success. Stay consistent always."
+  ],
+
   medium: [
-    "Typing daily improves speed and accuracy.",
-    "Practice makes a person better every day.",
+    "Typing improves speed and accuracy.",
+    "Practice daily typing to improve performance.",
     "Focus on each word carefully while typing.",
-    "Consistency is key to mastering any skill.",
+    "Consistency is key to mastering typing skills.",
     "Errors should be reduced with regular practice.",
     "Typing helps in faster communication online.",
-    "Work smart and practice regularly to improve.",
+    "Work smart, and practice regularly to improve.",
     "Accuracy matters more than speed initially.",
-    "Stay calm and focused while typing.",
-    "Typing is an essential modern skill."
+    "Stay calm, focused, and keep improving daily.",
+    "Typing is an essential skill in the modern world."
   ],
+
   hard: [
-    "Typing requires discipline, focus, and consistency for better performance.",
-    "Improving typing speed takes time, patience, and continuous practice daily.",
-    "Accuracy should never be compromised while increasing typing speed levels.",
-    "Challenging paragraphs improve concentration and mental sharpness.",
-    "Typing tests enhance both speed and cognitive abilities simultaneously.",
-    "Complex sentences with punctuation improve typing skills drastically.",
-    "Stay focused and avoid distractions while practicing typing daily.",
-    "Hard typing tests demand strong concentration and endurance.",
-    "Maintain rhythm and accuracy while typing difficult paragraphs.",
-    "Practice regularly to achieve mastery in typing skills."
+    "Typing requires focus, patience, and regular practice.",
+    "Improving typing speed takes time, effort, and dedication.",
+    "Accuracy should never be ignored, because mistakes reduce speed.",
+    "Challenging paragraphs improve concentration, and build habits.",
+    "Typing tests enhance speed, accuracy, and mental focus together.",
+    "Complex sentences, with punctuation, improve typing ability.",
+    "Stay focused, avoid distractions, and keep practicing daily.",
+    "Hard typing tests demand concentration, patience, and control.",
+    "Maintain rhythm, accuracy, and speed while typing paragraphs.",
+    "Practice regularly, stay disciplined, and achieve mastery."
   ],
+
   extreme: [
-    "Advanced typing challenges require maximum focus, precision, and endurance under time pressure.",
-    "Long paragraphs with punctuation and complex words test the true typing abilities of the user.",
-    "Consistency, speed, and accuracy must be balanced perfectly in extreme typing conditions.",
-    "Typing under pressure improves reaction time and overall keyboard control skills.",
-    "Extreme typing tests push the limits of speed, accuracy, and mental endurance.",
-    "Maintaining accuracy in long paragraphs is the ultimate challenge for typists.",
-    "Complex sentence structures demand higher concentration and typing discipline.",
-    "Typing efficiently requires synchronization between brain and hand movements.",
-    "Extreme challenges help in mastering typing speed and accuracy together.",
-    "Final level tests your ultimate typing skills under strict time constraints."
+    "Advanced typing requires multiple skills: speed, accuracy, and endurance; without these, progress becomes slow.",
+    "Long paragraphs, with punctuation and complex words, test the true ability of a typist.",
+    "Consistency is important; however, without focus, improvement becomes difficult.",
+    "Typing under pressure improves reaction time, and builds better keyboard control.",
+    "Extreme tests push your limits: speed must increase, accuracy must remain stable.",
+    "Maintaining accuracy in long texts is challenging; however, practice makes it easier.",
+    "Complex structures, including commas, colons, and semicolons, improve precision.",
+    "\"Practice daily,\" experts say, because consistency builds confidence.",
+    "Typing efficiently requires coordination between mind and hands; without it, speed suffers.",
+    "Final challenge: test your speed, accuracy, and patience under strict conditions."
   ]
 };
 
@@ -127,7 +183,7 @@ let level = 1;
 let timer;
 let timeLeft;
 
-// START
+// START GAME
 function startGame(m) {
   mode = m;
   level = 1;
@@ -141,7 +197,7 @@ function startGame(m) {
 
 // LOAD LEVEL
 function loadLevel() {
-  const text = data[mode][level - 1];
+  const text = dataSet[mode][level - 1];
   document.getElementById("text").innerText = text;
   document.getElementById("level").innerText = level;
 
@@ -155,10 +211,7 @@ function loadLevel() {
     timeLeft--;
     document.getElementById("time").innerText = timeLeft;
 
-    // 🔊 last 5 sec beep
-    if (timeLeft <= 5 && timeLeft > 0) {
-      beep();
-    }
+    if (timeLeft <= 5 && timeLeft > 0) beep();
 
     if (timeLeft === 0) {
       clearInterval(timer);
@@ -167,9 +220,9 @@ function loadLevel() {
   }, 1000);
 }
 
-// HIGHLIGHT
+// TYPING HIGHLIGHT
 document.getElementById("input").addEventListener("input", function() {
-  const text = data[mode][level - 1];
+  const text = dataSet[mode][level - 1];
   const typed = this.value;
 
   let result = "";
@@ -187,10 +240,10 @@ document.getElementById("input").addEventListener("input", function() {
   document.getElementById("text").innerHTML = result;
 });
 
-// NEXT
+// NEXT LEVEL
 function nextLevel() {
   const input = document.getElementById("input").value;
-  const correct = data[mode][level - 1];
+  const correct = dataSet[mode][level - 1];
 
   if (input !== correct) {
     alert("Complete correctly first!");
@@ -210,7 +263,7 @@ function restart() {
   loadLevel();
 }
 
-// 🔊 BEEP SOUND
+// SOUND
 function beep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
