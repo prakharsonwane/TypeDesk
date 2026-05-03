@@ -12,7 +12,7 @@
     /* LOGIN + MODE SAME BG */
     #loginPage, #modePage {
       background:
-      linear-gradient(135deg, #e0f2fe, #bae6fd, #7dd3fc);
+      linear-gradient(135deg, #b3bdc4, #4287ac, #4a6572);
   height: 100vh;
     }
 
@@ -41,14 +41,14 @@
     }
 
     button {
-      background: #0ea5e9;
+      background: #206180;
       color: white;
       cursor: pointer;
       font-weight: bold;
     }
 
     button:hover {
-      background: #0284c7;
+      background: #000000;
     }
 
     .hidden { display: none; }
@@ -75,8 +75,8 @@
     }
     #gamePage {
   min-height: 100vh;
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0, #6ee7b7);
-  color: #064e3b;
+  background: linear-gradient(135deg, #d6b48a, #85674e, #463225);
+  color: #1f120a;
 }
   </style></head><body><!-- LOGIN --><div id="loginPage" class="center">
   <div class="card">
@@ -190,7 +190,7 @@ function loadLevel(){
 document.getElementById("text").innerText=dataSet[mode][level-1];
 document.getElementById("level").innerText=level;
 
-timeLeft=mode==="easy"?30:mode==="medium"?45:mode==="hard"?90:180;
+timeLeft=mode==="easy"?30:mode==="medium"?45:mode==="hard"?90:150;
 document.getElementById("time").innerText=timeLeft;
 
 document.getElementById("input").value="";
